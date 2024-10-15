@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수집형 RPG 게임</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            background-image: url('../static/images/배경.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .game-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .character-img, .monster-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 10px #FFD700;
+        }
+
+        .character-img:hover, .monster-img:hover {
+            transform: scale(1.1);
+        }
+
+        .health-bar {
+            height: 10px;
+            background-color: #ff0000;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn-attack {
+            background-color: #f44336;
+        }
+
+        .btn-attack:hover {
+            background-color: #da190b;
+        }
+
+        .btn-skill {
+            background-color: #008CBA;
+        }
+
+        .btn-skill:hover {
+            background-color: #0073aa;
+        }
+
+        .result-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-left: 4px solid #FFD700;
+            color: #000;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-white">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-yellow-400">수집형 RPG 게임</h1>
+        
+        <div class="game-container">
+            <div class="flex flex-col md:flex-row justify-between gap-8">
+                <!-- 영웅 섹션 -->
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-2xl font-semibold mb-4 text-blue-400">영웅 진영</h2>
+                    <div class="space-y-6">
+                        {% for hero in heros %}
+                            <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ url_for('static', filename='images/' + hero.name + '.jpg') }}" alt="{{ hero.name }}" class="character-img rounded-lg">
+                                    </div>
+                                    <div class="ml-4 flex-grow">
+                                        <h3 class="text-xl font-semibold text-yellow-400">{{ hero.name }}</h3>
+                                        <div class="mt-2 bg-gray-700 rounded-full h-2.5">
+                                            <div class="health-bar rounded-full" style="width: {{ (hero.HP / hero.max_HP) * 100 }}%;"></div>
+                                        </div>
+                                        <p class="text-gray-400 mt-1">HP: {{ hero.HP }}/{{ hero.max_HP }}</p>
+                                        <form action="{{ url_for('choose_action') }}" method="post" class="mt-4">
+                                            <input type="hidden" name="hero" value="{{ loop.index0 }}">
+                                            <div class="flex items-center mb-2">
+                                                <label for="target" class="mr-2 text-sm">타겟:</label>
+                                                <select name="target" id="target" class="flex-grow p-1 border rounded text-sm bg-gray-700 text-white">
+                                                    {% for monster in monsters %}
+                                                        <option value="{{ loop.index0 }}">{{ monster.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="flex justify-left">
+                                                <button type="submit" name="action" value="attack" class="btn btn-attack">공격</button>
+                                                <button type="submit" name="action" value="skill" class="btn btn-skill">스킬</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 몬스터 섹션 -->
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-2xl font-semibold mb-4 text-red-400">몬스터 진영</h2>
+                    <div class="space-y-6">
+                        {% for monster in monsters %}
+                            <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                                <div class="flex items-center flex-row-reverse p-4">
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ url_for('static', filename='images/' + monster.name + '.jpg') }}" alt="{{ monster.name }}" class="monster-img rounded-lg">
+                                    </div>
+                                    <div class="mr-4 flex-grow">
+                                        <h3 class="text-xl font-semibold text-red-400">{{ monster.name }}</h3>
+                                        <div class="mt-2 bg-gray-700 rounded-full h-2.5">
+                                            <div class="health-bar rounded-full" style="width: {{ (monster.HP / monster.max_HP) * 100 }}%;"></div>
+                                        </div>
+                                        <p class="text-gray-400 mt-1">HP: {{ monster.HP }}/{{ monster.max_HP }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if attack_result %}
+                <div id="result" class="result-container">
+                    <p class="font-bold">전투 결과:</p>
+                    <p>{{ attack_result }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // 결과 메시지 페이드 아웃
+        const resultElement = document.getElementById('result');
+        if (resultElement) {
+            setTimeout(() => {
+                resultElement.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 체력바 애니메이션
+        function animateHealthBars() {
+            const healthBars = document.querySelectorAll('.health-bar');
+            healthBars.forEach(bar => {
+                const currentWidth = parseFloat(bar.style.width);
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = `${currentWidth}%`;
+                }, 100);
+            });
+        }
+
+        window.onload = animateHealthBars;
+    </script>
+</body>
+</html>

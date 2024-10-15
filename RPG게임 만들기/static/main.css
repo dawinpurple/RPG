@@ -1,0 +1,17 @@
+.background{
+    background-image: url('../static/images/배경.jpg');
+    background-size: cover;
+    color:white;
+    text-align: center;
+    padding: 300px 300px;
+
+}
+
+.stbt{
+    width:100px;
+    height: 30px;
+    border-radius: 3px;
+    font-size: 20px;
+    border: none;
+    color: red;
+}
