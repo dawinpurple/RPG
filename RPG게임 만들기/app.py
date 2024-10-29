@@ -1,10 +1,11 @@
 import flask
 import random
 from limbus_player import 캐릭터,격투가,보안관,결투가,도적우두머리,도적일,도적이
-
-
+from login import load_user, add_user
 app=flask.Flask(__name__)
 app.secret_key="secret"
+
+
 
 def inital_game():
     격투가1 = 격투가()
@@ -27,7 +28,37 @@ def inital_game():
 def index():
     return flask.render_template('index.html')
 
-@app.route('/game', methods = ['POST'])
+@app.route('/login',methods=['GET','POST'])
+def login():
+    if flask.request.method == 'POST':
+        username = flask.request.form.get('username')
+        password = flask.request.form.get('password')
+        print(username,password)
+
+        if load_user(username,password):
+            print(username,password)
+            return flask.redirect(flask.url_for('game'))
+        else:
+            return "로그인 실패,아이디 또는 비밀번호를 학인하세요"
+    
+    return flask.render_template("login.html")
+
+@app.route("/register",methods=["GET","POST"])
+def register():
+    if flask.request.method == 'POST':
+        username = flask.request.form.get('username')
+        password = flask.request.form.get('password')
+
+        if not username or not password:
+            return "사용자의 이름과 비밀번호를 입력하세요."
+        
+        if add_user(username,password):
+            return flask.render_template("register.html")
+        else:
+            return "사용자가 이미 존재합니다."
+    return flask.render_template("register.html")
+
+@app.route('/game', methods = ['POST','GET'])
 def game():
     heros,monsters = inital_game()
 
